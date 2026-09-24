@@ -173,7 +173,7 @@ Os dados sintéticos utilizados neste projeto foram disponibilizados publicament
 ---
 
 ## 🎬 Vídeo Demonstrativo
-Confira a apresentação do dashboard em funcionamento e o storytelling analítico na [publicação do LinkedIn](link).
+Confira a apresentação do dashboard em funcionamento e o storytelling analítico na [publicação do LinkedIn](https://lnkd.in/p/eN3HY64j).
 
 ---
 
