@@ -2,13 +2,15 @@
 
 Uma solução end-to-end de Business Intelligence desenvolvida para analisar a **retenção de clientes (Cohort Analysis)**, o **LifeTime Value (LTV)** e o faturamento recorrente do **E-commerce Dalilos**.
 
+<p align="center"> <img width="577" height="324" alt="img_dashboard_powerbi" src="https://github.com/user-attachments/assets/55e8c332-8c99-45a0-afa7-1a4835333a45" /> </p>
+
 ---
 
 ## 📌 1. Visão Geral do Projeto
 
 No cenário do e-commerce moderno, o Custo de Aquisição de Clientes (CAC) é frequentemente elevado. Por isso, prever a vida útil financeira de um cliente e entender a eficiência da recompra ao longo do tempo é vital para a sustentabilidade da operação.
 
-Este projeto entrega um **Dashboard Executivo e Interativo** no Power BI abastecido por uma arquitetura robusta no PostgreSQL, desenhado para responder a perguntas estratégicas da liderança:
+Desenvolvi este **Dashboard Executivo e Interativo** no Power BI abastecido por uma arquitetura robusta no PostgreSQL, projetado para responder às seguintes perguntas estratégicas da liderança:
 
 * Qual é a taxa de retenção média das safras no Mês 1 ($M1$)?
 * Quanto da receita total vem de recompras ($M1+$) vs. primeira compra ($M0$)?
@@ -17,8 +19,17 @@ Este projeto entrega um **Dashboard Executivo e Interativo** no Power BI abastec
 
 ---
 
-## 🎨 2. Design & Inspiração Visual
+## 🎨 2. Design, Prototipação & Inspiração Visual
 
+### 🖌️ Prototipação no Excalidraw
+Antes de escrever qualquer linha de código ou criar telas no Power BI, **planejei e desenhei todo o protótipo da análise no Excalidraw**. Defini previamente quais dados seriam necessários, quais KPIs trariam valor real ao negócio e qual seria o layout inicial. O painel evoluiu de forma orgânica ao longo do desenvolvimento, mas a estrutura conceitual manteve a clareza e a objetividade desenhadas no protótipo.
+
+<p align="center">
+  <!-- INSIRA A SUA IMAGEM DO EXCALIDRAW AQUI -->
+  <em>[Cole aqui a imagem do seu protótipo no Excalidraw]</em>
+</p>
+
+### 🎬 Referências de Design
 O design e a usabilidade do dashboard foram inspirados nas estruturas analíticas e visuais desenvolvidas pela **Goodly**, visando uma navegação fluida e focada em tomada de decisão.
 
 * 🎬 **Referência visual:** [Vídeo Demonstrativo - Goodly (YouTube)](https://www.youtube.com/watch?v=I5LtnL9fxVA)
@@ -28,9 +39,9 @@ O design e a usabilidade do dashboard foram inspirados nas estruturas analítica
 
 ## 🎯 3. Metodologia & Regras de Negócio
 
-Para garantir a **consistência estatística** e focar nos clientes genuinamente converted, aplicamos regras rigorosas de limpeza, segmentação e validação nas etapas de banco de dados e auditoria:
+Para garantir a **consistência estatística** e focar nos clientes genuinamente convertidos, apliquei regras rigorosas de limpeza, segmentação e validação nas etapas de banco de dados e auditoria:
 
-* **Base Convertida:** De um total de $8.000$ clientes cadastrados, a análise considera estritamente $7.200$ **clientes ativos**, cujos pedidos foram entregues (`order_status = 'Delivered'`) e não sofreram devolução (`returned = 0`).
+* **Base Convertida:** De um total de $8.000$ clientes cadastrados, considerei estritamente $7.200$ **clientes ativos**, cujos pedidos foram entregues (`order_status = 'Delivered'`) e não sofreram devolução (`returned = 0`).
 * **Análise de Safra (Cohort):** O mês da primeira compra (`cohort_month`) define o grupo/safra do cliente.
 * **Índice de Cohort (**$M0, M1, M2 \dots$**):** Mapeamento do deslocamento em meses entre a data da compra atual e a data de aquisição do cliente:
 
@@ -40,30 +51,40 @@ $$
 
 ---
 
-## 🏗️ 4. Arquitetura da Solução
+## 🏗️ 4. Arquitetura da Solução & Validação
 
 ```
- ┌────────────────┐      ┌─────────────────────────┐      ┌──────────────────┐
- │ Data Source    │ ───> │ PostgreSQL (SQL Engine) │ ───> │ Power BI         │
- │ (Orders/Cust.) │      │ Viewvw_cohort_retention │      │ DAX & Dashboards │
- └────────────────┘      └─────────────────────────┘      └──────────────────┘
+ ┌────────────────┐      ┌─────────────────────────┐      ┌─────────────────┐      ┌──────────────────┐
+ │ Data Source    │ ───> │ PostgreSQL (SQL Engine) │ ───> │ Google Sheets   │ ───> │ Power BI         │
+ │ (Orders/Cust.) │      │ View vw_cohort_retention│      │ (Auditoria)     │      │ DAX & Dashboards │
+ └────────────────┘      └─────────────────────────┘      └─────────────────┘      └──────────────────┘
 ```
 
-### 🐘 Layer 1: PostgreSQL (Data Engineering)
+### 🐘 Layer 1: Engenharia de Dados no PostgreSQL
+Centralizei toda a lógica pesada de transformação e agregação na View `vw_cohort_retention` utilizando CTEs (*Common Table Expressions*):
 
-Toda a lógica pesada de transformação e agregação foi centralizada na View `vw_cohort_retention` utilizando CTEs (*Common Table Expressions*):
+1. **`first_purchase`**: Identifiquei a data exata da 1ª compra de cada cliente, preservando as dimensões de `acquisition_channel`, `country` e `category`.
+2. **`customer_activities`**: Mapeei todas as transações subsequentes elegíveis, somando receita mensal (`monthly_revenue`) e volume de pedidos (`monthly_orders`).
+3. **`cohort_size`**: Calculei o volume inicial de clientes de cada safra ($M0$).
+4. **`cohort_index_calc`**: Calculei o índice dinâmico ($M0, M1, M2 \dots$) e consolidei o volume de clientes ativos, pedidos e faturamento.
 
-1. **`first_purchase`**: Identifica a data exata da 1ª compra de cada cliente, preservando as dimensões de `acquisition_channel`, `country` e `category`.
-2. **`customer_activities`**: Mapeia todas as transações subsequentes elegíveis, somando receita mensal (`monthly_revenue`) e volume de pedidos (`monthly_orders`).
-3. **`cohort_size`**: Calcula o volume inicial de clientes de cada safra ($M0$).
-4. **`cohort_index_calc`**: Calcula o índice dinâmico ($M0, M1, M2 \dots$) e consolida o volume de clientes ativos, pedidos e faturamento.
+<p align="center">
+  <!-- INSIRA A SUA IMAGEM DO POSTGRESQL AQUI -->
+  <em>[Cole aqui a imagem da sua View ou das consultas no PostgreSQL]</em>
+</p>
 
-### 📊 Layer 2: Power BI & Modelagem DAX
+### 📑 Layer 2: Auditoria Cruzada no Google Sheets
+Em **todas as etapas do projeto, realizei validações constantes no Google Sheets**. Exportei amostras dos dados e agregados do PostgreSQL para conferir se os totais de clientes por safra, faturamento acumulado, contagens de pedidos e índices de cohort batiam exatamente com os cálculos esperados. Essa auditoria manual garantiu que nenhuma métrica chegasse com inconsistência ao Power BI.
 
-O Power BI consome a View limpa, permitindo alta performance em filtros cruzados (*Slicers* por Canal, País e Categoria).
+<p align="center">
+  <!-- INSIRA A SUA IMAGEM DO GOOGLE SHEETS AQUI -->
+  <em>[Cole aqui a imagem da sua planilha de validação no Google Sheets]</em>
+</p>
+
+### 📊 Layer 3: Power BI & Modelagem DAX
+Conectei o Power BI à View limpa e auditada, construindo uma modelagem em Star Schema de alta performance com filtros cruzados (*Slicers* por Canal, País e Categoria).
 
 * **Receita Recorrente (**$M1+$**):**
-
 ```dax
 Receita Recorrente = 
 CALCULATE(
@@ -76,21 +97,46 @@ CALCULATE(
 ```
 
 * **LTV Médio por Safra:**
-
 ```dax
 LTV Medio = 
-DIVIDE(
-    SUM('vw_cohort_retention'[cohort_revenue]),
-    MAX('vw_cohort_retention'[cohort_size]),
-    0
-)
+VAR ReceitaTotal = SUM('public vw_cohort_retention'[cohort_revenue])
+VAR ClientesValidos = [Total Clientes Cadastrados]
+
+RETURN
+    DIVIDE(ReceitaTotal, ClientesValidos, 0)
+```
+
+* **Retenção Média no Mês 1 ($M1$):**
+```dax
+Retencao Media M1 = 
+VAR AtivosM1 = 
+    CALCULATE(
+        DISTINCTCOUNT('public vw_cohort_retention'[customer_id]),
+        'public vw_cohort_retention'[cohort_index] = 1
+    )
+
+VAR SafrasComM1 = 
+    CALCULATETABLE(
+        VALUES('public vw_cohort_retention'[cohort_month]),
+        'public vw_cohort_retention'[cohort_index] = 1
+    )
+
+VAR BaseM0 = 
+    CALCULATE(
+        DISTINCTCOUNT('public vw_cohort_retention'[customer_id]),
+        'public vw_cohort_retention'[cohort_index] = 0,
+        'public vw_cohort_retention'[cohort_month] IN SafrasComM1
+    )
+
+RETURN
+    DIVIDE(AtivosM1, BaseM0, 0)
 ```
 
 ---
 
 ## 📈 5. Principais KPIs & Resultados Encontrados
 
-Após os testes de validação e auditoria de dados no Google Sheets:
+Após concluir os testes de validação no Google Sheets e no Power BI:
 
 | Métrica Executiva | Valor Apurado | Significado de Negócio |
 | :--- | :--- | :--- |
@@ -98,7 +144,7 @@ Após os testes de validação e auditoria de dados no Google Sheets:
 | **Receita Total Gerada** | **R\$ 10,92M** | Volume financeiro global de todas as safras |
 | **Receita Recorrente (**$M1+$**)** | **R\$ 1,64M** | Faturamento gerado exclusivamente por recompras |
 | **Volume de Compras** | **25.000** | Total de transações entregues e válidas na base |
-| **Retenção Média no** $M1$ | **\~35% a 40%** | Taxa média de retorno de clientes no mês subsequente à compra |
+| **Retenção Média no** $M1$ | **\~2% a 5%** | Taxa real de retorno dos clientes no mês subsequente à compra inicial |
 
 ---
 
@@ -107,7 +153,7 @@ Após os testes de validação e auditoria de dados no Google Sheets:
 Os dados sintéticos utilizados neste projeto foram disponibilizados publicamente por **Meruva Kodanda** através do Kaggle.
 
 * 🔗 **Fonte do Dataset:** [E-Commerce Customer Behavior and Sales (2020-2026) - Kaggle](https://www.kaggle.com/datasets/meruvakodandasuraj/e-commerce-customer-behavior-and-sales-20202026)
-* 🔒 **Privacidade & LGPD:** Todas as informações contidas na base são anonimizadas e desprovidas de dados pessoais identificáveis (PII), respeitando as diretrizes da **Lei Geral de Proteção de Dados (LGPD)** e boas práticas globais de segurança da informação.
+* 🔒 **Privacidade & LGPD:** Todas as informações contidas na base são totalmente anonimizadas e desprovidas de dados pessoais identificáveis (PII), respeitando as diretrizes da **Lei Geral de Proteção de Dados (LGPD)** e boas práticas globais de segurança da informação.
 
 ---
 
@@ -118,7 +164,6 @@ Os dados sintéticos utilizados neste projeto foram disponibilizados publicament
 * Power BI Desktop
 
 ### Passo a Passo
-
 1. **Clonar o Repositório:**
    ```bash
    git clone https://github.com/pauloviniciusrsouza/ecommerce-dalilos-cohort-retention.git
@@ -145,5 +190,4 @@ Os dados sintéticos utilizados neste projeto foram disponibilizados publicament
 * 🐙 **GitHub:** [pauloviniciusrsouza](https://github.com/pauloviniciusrsouza)
 * 📧 **E-mail:** pauloviniciusrsouza@gmail.com
 
----
 *Projeto desenvolvido para fins de portfólio e análise de inteligência de negócios do E-commerce Dalilos.*
