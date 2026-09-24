@@ -151,7 +151,7 @@ Os dados sintéticos utilizados neste projeto foram disponibilizados publicament
 ## ⚙️ 7. Como Replicar o Projeto
 
 ### Pré-requisitos
-* PostgreSQL 13+
+* PostgreSQL 17+
 * Power BI Desktop
 
 ### Passo a Passo
