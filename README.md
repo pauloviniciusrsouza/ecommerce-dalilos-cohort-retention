@@ -24,15 +24,12 @@ Desenvolvi este **Dashboard Executivo e Interativo** no Power BI abastecido por 
 ### 🖌️ Prototipação no Excalidraw
 Antes de escrever qualquer linha de código ou criar telas no Power BI, **planejei e desenhei todo o protótipo da análise no Excalidraw**. Defini previamente quais dados seriam necessários, quais KPIs trariam valor real ao negócio e qual seria o layout inicial. O painel evoluiu de forma orgânica ao longo do desenvolvimento, mas a estrutura conceitual manteve a clareza e a objetividade desenhadas no protótipo.
 
-<p align="center">
-  <!-- INSIRA A SUA IMAGEM DO EXCALIDRAW AQUI -->
-  <em>[Cole aqui a imagem do seu protótipo no Excalidraw]</em>
-</p>
+<p align="center"> <img width="600" height="337" alt="img_excalidraw" src="https://github.com/user-attachments/assets/2dbbaa26-dff6-434d-8a51-b44bba9ea5f5" /> </p>
 
 ### 🎬 Referências de Design
 O design e a usabilidade do dashboard foram inspirados nas estruturas analíticas e visuais desenvolvidas pela **Goodly**, visando uma navegação fluida e focada em tomada de decisão.
 
-* 🎬 **Referência visual:** [Vídeo Demonstrativo - Goodly (YouTube)](https://www.youtube.com/watch?v=I5LtnL9fxVA)
+* 🎬 **Referência visual:** [Build a Cohort Analysis Dashboard in Power BI | Step-by-Step - Goodly (YouTube)](https://www.youtube.com/watch?v=I5LtnL9fxVA)
 * 🎨 **Ícones:** Os ícones e elementos visuais utilizados na interface do dashboard foram obtidos na plataforma [Flaticon](https://www.flaticon.com/).
 
 ---
@@ -68,18 +65,12 @@ Centralizei toda a lógica pesada de transformação e agregação na View `vw_c
 3. **`cohort_size`**: Calculei o volume inicial de clientes de cada safra ($M0$).
 4. **`cohort_index_calc`**: Calculei o índice dinâmico ($M0, M1, M2 \dots$) e consolidei o volume de clientes ativos, pedidos e faturamento.
 
-<p align="center">
-  <!-- INSIRA A SUA IMAGEM DO POSTGRESQL AQUI -->
-  <em>[Cole aqui a imagem da sua View ou das consultas no PostgreSQL]</em>
-</p>
+<p align="center"> <img width="957" height="540" alt="img_postgresql" src="https://github.com/user-attachments/assets/ec8822f6-216c-46f0-b420-85a6773fa2f2" /> </p>
 
 ### 📑 Layer 2: Auditoria Cruzada no Google Sheets
 Em **todas as etapas do projeto, realizei validações constantes no Google Sheets**. Exportei amostras dos dados e agregados do PostgreSQL para conferir se os totais de clientes por safra, faturamento acumulado, contagens de pedidos e índices de cohort batiam exatamente com os cálculos esperados. Essa auditoria manual garantiu que nenhuma métrica chegasse com inconsistência ao Power BI.
 
-<p align="center">
-  <!-- INSIRA A SUA IMAGEM DO GOOGLE SHEETS AQUI -->
-  <em>[Cole aqui a imagem da sua planilha de validação no Google Sheets]</em>
-</p>
+<p align="center"> <img width="952" height="480" alt="img_sheets" src="https://github.com/user-attachments/assets/901ba72c-aecc-4e41-a4f0-b121c6ec190d" /> </p>
 
 ### 📊 Layer 3: Power BI & Modelagem DAX
 Conectei o Power BI à View limpa e auditada, construindo uma modelagem em Star Schema de alta performance com filtros cruzados (*Slicers* por Canal, País e Categoria).
@@ -136,15 +127,15 @@ RETURN
 
 ## 📈 5. Principais KPIs & Resultados Encontrados
 
-Após concluir os testes de validação no Google Sheets e no Power BI:
+Após concluir as etapas de modelagem, transformações de dados e testes de validação cruzada no Google Sheets e no Power BI, os números finais apurados para o **E-commerce Dalilos** foram:
 
 | Métrica Executiva | Valor Apurado | Significado de Negócio |
-| :--- | :--- | :--- |
-| **Base Convertida** | **7.200** | Clientes com pelo menos 1 pedido entregue e não devolvido |
-| **Receita Total Gerada** | **R\$ 10,92M** | Volume financeiro global de todas as safras |
-| **Receita Recorrente (**$M1+$**)** | **R\$ 1,64M** | Faturamento gerado exclusivamente por recompras |
-| **Volume de Compras** | **25.000** | Total de transações entregues e válidas na base |
-| **Retenção Média no** $M1$ | **\~2% a 5%** | Taxa real de retorno dos clientes no mês subsequente à compra inicial |
+| :--- | :---: | :--- |
+| **Base Convertida** | **7.401** | Clientes com pelo menos 1 pedido entregue e não devolvido |
+| **Volume de Compras** | **20.497** | Total de transações entregues e válidas na base |
+| **Retenção Média no** $M1$ | **3,75%** | Taxa real de retorno dos clientes no primeiro mês após a compra inicial |
+| **LTV Médio** | **R$ 349,29** | Valor financeiro médio gerado por cada cliente ao longo do tempo de vida |
+| **Receita de Recompra** | **R$ 1,64M** | Faturamento acumulado vindo exclusivamente de recompras ($M1+$) |
 
 ---
 
@@ -172,12 +163,17 @@ Os dados sintéticos utilizados neste projeto foram disponibilizados publicament
 
 2. **Configurar o Banco de Dados:**
    * Importe o dataset original para o PostgreSQL.
-   * Execute o script de criação da View disponível na pasta `/sql/vw_cohort_retention.sql`.
+   * Execute o script de criação da View disponível na pasta `/sql/script_vw_cohort_retention.sql`.
 
 3. **Abrir o Dashboard no Power BI:**
    * Abra o arquivo `/pbix/Cohort_Retention_Dashboard.pbix`.
    * Atualize as credenciais de conexão da fonte PostgreSQL para apontar para o seu ambiente local (`Transform Data -> Data source settings`).
    * Clique em **Refresh**.
+
+---
+
+## 🎬 Vídeo Demonstrativo
+Confira a apresentação do dashboard em funcionamento e o storytelling analítico na [publicação do LinkedIn](link).
 
 ---
 
